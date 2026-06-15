@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Multimodal Medical Symptom Triage - AI-driven health severity scoring, lesion classification, and agentic medical recommendations.">
+    <title>MYDNA Triage — Multi-Layer AI Clinical Diagnostic System</title>
+    
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons for modern UI -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-text">MY<span class="logo-accent">DNA</span></span>
+                <span class="badge badge-tech">TRIAGE</span>
+            </div>
+            
+            <nav class="nav-links">
+                <a href="#hero" class="active">Home</a>
+                <a href="#triage-tool">Triage Dashboard</a>
+                <a href="#architecture">Architecture</a>
+                <a href="#colab-guides">Colab Notebooks</a>
+            </nav>
+            
+            <div class="header-actions">
+                <button class="btn btn-secondary btn-icon" id="open-config-btn" title="Configure API Settings">
+                    <i class="fa-solid fa-sliders"></i>
+                </button>
+                <a href="#triage-tool" class="btn btn-primary">Run Diagnostic</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-content">
+        
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section">
+            <div class="hero-container">
+                <div class="hero-text-content">
+                    <div class="tagline">
+                        <span class="pulse-dot"></span>
+                        Next-Gen Clinical Decision Support
+                    </div>
+                    <h1>Multimodal Medical<br><span class="gradient-text">Symptom Triage</span></h1>
+                    <p class="hero-desc">
+                        Analyze visual skin lesions and natural language symptoms simultaneously. Powered by a federated ML layer (EfficientNetB0 + DistilBERT + XGBoost) and Claude 3.5 Haiku, delivering rapid clinical routing and feature explainability.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="#triage-tool" class="btn btn-primary btn-large">
+                            <i class="fa-solid fa-notes-medical"></i> Start Analysis
+                        </a>
+                        <a href="#architecture" class="btn btn-outline btn-large">
+                            <i class="fa-solid fa-sitemap"></i> Explore Pipeline
+                        </a>
+                    </div>
+                    
+                    <!-- Tech Specs Row -->
+                    <div class="tech-specs-grid">
+                        <div class="spec-card">
+                            <div class="spec-value">82-85%</div>
+                            <div class="spec-label">EfficientNetB0 (HAM10000)</div>
+                        </div>
+                        <div class="spec-card">
+                            <div class="spec-value">87-91%</div>
+                            <div class="spec-label">DistilBERT Classifier</div>
+                        </div>
+                        <div class="spec-card">
+                            <div class="spec-value">80%+</div>
+                            <div class="spec-label">XGBoost Severity Score</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Visual: Animated 3D DNA Canvas -->
+                <div class="hero-visual-container">
+                    <div style="position:relative;">
+                        <canvas id="dna-canvas" width="420" height="540"></canvas>
+                        <div class="model-status-card">
+                            <div class="status-item">
+                                <span class="status-dot"></span>
+                                <span>EfficientNet-B0</span>
+                                <span class="status-pct">84.2% F1</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-dot"></span>
+                                <span>DistilBERT NLP</span>
+                                <span class="status-pct">89.8% F1</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-dot"></span>
+                                <span>XGBoost Severity</span>
+                                <span class="status-pct">81.5% F1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuration Modal -->
+        <div id="config-modal" class="modal">
+            <div class="modal-content glass-panel">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-gear"></i> System & API Settings</h3>
+                    <button class="close-modal-btn" id="close-config-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-desc">
+                        By default, this dashboard operates in <strong>Simulated Mode</strong> to showcase the frontend design. You can configure your Hugging Face Space endpoint and Claude API credentials to run live analyses.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="backend-mode">Operation Mode</label>
+                        <select id="backend-mode" class="form-control">
+                            <option value="simulated">Simulation Mode (Preloaded Clinical Cases)</option>
+                            <option value="live-hf">Live Hugging Face Spaces Backend</option>
+                        </select>
+                    </div>
+
+                    <div id="hf-config-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="hf-endpoint">Hugging Face Space API URL</label>
+                            <input type="text" id="hf-endpoint" class="form-control" placeholder="e.g., https://username-medical-triage.hf.space/api/predict">
+                            <small class="form-help">Ensure your Hugging Face space is active and accepts Gradio API requests.</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="claude-key">Claude API Key (Optional)</label>
+                        <input type="password" id="claude-key" class="form-control" placeholder="sk-ant-...">
+                        <small class="form-help">We recommend storing this in your Hugging Face Space secrets instead of client-side for security.</small>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" id="reset-config-btn">Reset Defaults</button>
+                        <button class="btn btn-primary" id="save-config-btn">Apply Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Triage Dashboard Section -->
+        <section id="triage-tool" class="dashboard-section">
+            <div class="section-header">
+                <h2>Clinical <span class="gradient-text">Triage Workspace</span></h2>
+                <p>Input text symptoms, patient parameters, and upload visual skin lesion/rash images to invoke the multi-layer classification engine.</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Inputs Column -->
+                <div class="dashboard-inputs glass-panel">
+                    <div class="panel-header">
+                        <i class="fa-solid fa-notes-medical icon-accent"></i>
+                        <h3>Patient Intake Form</h3>
+                    </div>
+                    
+                    <form id="triage-form" class="triage-form">
+                        <!-- Vitals Grid -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="patient-age">Age</label>
+                                <input type="number" id="patient-age" class="form-control" min="0" max="120" value="28" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="patient-gender">Gender</label>
+                                <select id="patient-gender" class="form-control" required>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="patient-temp">Temperature (&deg;C)</label>
+                                <input type="number" id="patient-temp" class="form-control" step="0.1" min="30" max="45" value="36.8" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="patient-sp02">SpO2 (%)</label>
+                                <input type="number" id="patient-sp02" class="form-control" min="50" max="100" value="98" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="patient-hr">Heart Rate (bpm)</label>
+                                <input type="number" id="patient-hr" class="form-control" min="30" max="220" value="72" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="patient-bp">Blood Pressure (Systolic)</label>
+                                <input type="number" id="patient-bp" class="form-control" min="50" max="250" value="120" required>
+                            </div>
+                        </div>
+
+                        <!-- Structured Symptom Checklist (Random Forest Path) -->
+                        <div class="form-group">
+                            <label>Structured Symptom Flags (Select all that apply)</label>
+                            <div class="symptom-chips">
+                                <div class="symptom-chip" data-val="itching">Itching</div>
+                                <div class="symptom-chip" data-val="skin_rash">Skin Rash</div>
+                                <div class="symptom-chip" data-val="continuous_sneezing">Continuous Sneezing</div>
+                                <div class="symptom-chip" data-val="shivering">Shivering</div>
+                                <div class="symptom-chip" data-val="joint_pain">Joint Pain</div>
+                                <div class="symptom-chip" data-val="stomach_pain">Stomach Pain</div>
+                                <div class="symptom-chip" data-val="vomiting">Vomiting</div>
+                                <div class="symptom-chip" data-val="fatigue">Fatigue</div>
+                                <div class="symptom-chip" data-val="cough">Cough</div>
+                                <div class="symptom-chip" data-val="high_fever">High Fever</div>
+                                <div class="symptom-chip" data-val="headache">Headache</div>
+                                <div class="symptom-chip" data-val="breathlessness">Shortness of Breath</div>
+                            </div>
+                        </div>
+
+                        <!-- Text Input (DistilBERT Path) -->
+                        <div class="form-group">
+                            <label for="symptom-text">Natural Language Description</label>
+                            <textarea id="symptom-text" class="form-control" rows="4" placeholder="Describe the progression of symptoms, onset duration, and visual indicators... (e.g. 'I noticed an itchy red rash on my inner arm three days ago, which has started blistering slightly and feels warm.')" required></textarea>
+                            <div class="preset-links">
+                                <span>Try presets:</span>
+                                <a href="#" class="preset-btn" data-preset="rash">Dermatitis Rash</a>
+                                <a href="#" class="preset-btn" data-preset="emergency">Anaphylactic Shock</a>
+                                <a href="#" class="preset-btn" data-preset="psoriasis">Psoriasis Patch</a>
+                            </div>
+                        </div>
+
+                        <!-- Image Upload (EfficientNetB0 Path) -->
+                        <div class="form-group">
+                            <label>Visual Lesion / Wound Image (Optional)</label>
+                            <div class="upload-dropzone" id="upload-zone">
+                                <input type="file" id="image-input" accept="image/*" class="file-input">
+                                <div class="dropzone-content" id="dropzone-default">
+                                    <i class="fa-solid fa-cloud-arrow-up icon-upload"></i>
+                                    <p class="upload-main-text">Drag & drop skin image here or <span>browse</span></p>
+                                    <p class="upload-sub-text">Supports JPG, PNG, WEBP (Autocropped to 224x224 for EfficientNet)</p>
+                                </div>
+                                <div class="dropzone-content hide" id="dropzone-preview">
+                                    <img id="image-preview" src="#" alt="Skin Lesion Preview">
+                                    <button type="button" class="btn-remove-image" id="remove-image-btn"><i class="fa-solid fa-trash"></i> Remove</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full" id="btn-submit-triage">
+                            <span id="btn-text"><i class="fa-solid fa-circle-nodes"></i> Analyze Case</span>
+                            <span id="btn-loader" class="hide"><i class="fa-solid fa-circle-notch fa-spin"></i> Running Classifiers...</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Outputs Column -->
+                <div class="dashboard-outputs">
+                    <!-- Scanning Overlay for Processing State -->
+                    <div id="scanning-overlay" class="glass-panel flex-center hide">
+                        <div class="scan-wrapper">
+                            <div class="scan-scanner"></div>
+                            <div class="scan-pulse"></div>
+                            <i class="fa-solid fa-user-shield scan-icon"></i>
+                            <h4>Processing Patient Metrics</h4>
+                            <p id="scan-status-text">Routing to Classifiers...</p>
+                        </div>
+                    </div>
+
+                    <!-- Default Welcome Card -->
+                    <div id="result-placeholder" class="glass-panel flex-center">
+                        <div class="placeholder-content">
+                            <div class="placeholder-icon">
+                                <i class="fa-solid fa-stethoscope"></i>
+                            </div>
+                            <h3>Diagnostic Analysis Queue</h3>
+                            <p>Fill out the Patient Intake Form and submit to initialize the ML classifiers, compute the SHAP feature weights, and generate Agentic clinical advice.</p>
+                        </div>
+                    </div>
+
+                    <!-- Live Results Content -->
+                    <div id="result-content" class="hide">
+                        <!-- Severity Badge & Risk Rating -->
+                        <div class="glass-panel result-card severity-card" id="severity-banner">
+                            <div class="severity-header">
+                                <div class="severity-title-block">
+                                    <span class="severity-subtitle">TRIAGE CLASSIFICATION</span>
+                                    <h3 id="severity-status-text">MILD SEVERITY</h3>
+                                </div>
+                                <div class="severity-badge-icon" id="severity-badge-icon">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                            </div>
+                            <div class="severity-details">
+                                <div class="detail-stat">
+                                    <span class="stat-label">XGBoost Risk Score</span>
+                                    <span class="stat-val" id="xgboost-risk-score">28%</span>
+                                </div>
+                                <div class="detail-stat">
+                                    <span class="stat-label">Clinical Pathway</span>
+                                    <span class="stat-val text-uppercase" id="clinical-pathway">Standard Triage</span>
+                                </div>
+                                <div class="detail-stat">
+                                    <span class="stat-label">Urgency Gate</span>
+                                    <span class="stat-val" id="urgency-gate">Green</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Classifiers Probability Outputs -->
+                        <div class="glass-panel result-card">
+                            <div class="panel-header border-bottom">
+                                <i class="fa-solid fa-brain icon-accent"></i>
+                                <h3>ML Classifier Probabilities</h3>
+                            </div>
+                            <div class="probabilities-grid">
+                                <!-- Text Classifier -->
+                                <div class="prob-group">
+                                    <div class="prob-header">
+                                        <h4>Text Predictor <small>(DistilBERT + RF)</small></h4>
+                                        <span class="badge badge-tech" id="text-primary-disease">Eczema (88%)</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar-fill text-fill" id="text-prob-bar" style="width: 88%"></div>
+                                    </div>
+                                    <div class="prob-breakdown" id="text-predictions-list">
+                                        <!-- Populated dynamically -->
+                                    </div>
+                                </div>
+
+                                <!-- Image Classifier -->
+                                <div class="prob-group" id="image-classifier-prob-group">
+                                    <div class="prob-header">
+                                        <h4>Visual Lesion Predictor <small>(EfficientNetB0)</small></h4>
+                                        <span class="badge badge-tech" id="image-primary-disease">Benign Keratosis (76%)</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar-fill image-fill" id="image-prob-bar" style="width: 76%"></div>
+                                    </div>
+                                    <div class="prob-breakdown" id="image-predictions-list">
+                                        <!-- Populated dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SHAP Explainability Graph -->
+                        <div class="glass-panel result-card">
+                            <div class="panel-header border-bottom">
+                                <i class="fa-solid fa-chart-bar icon-accent"></i>
+                                <h3>SHAP Feature Importance</h3>
+                            </div>
+                            <p class="panel-desc">Visualizes how much each input feature (symptom, age, temperature) pushed the XGBoost severity score up (red) or down (blue).</p>
+                            <div class="shap-chart" id="shap-chart-container">
+                                <!-- Horizontal bar charts will be rendered here dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Claude Agentic Layer Output -->
+                        <div class="glass-panel result-card claude-card">
+                            <div class="panel-header border-bottom">
+                                <div class="claude-brand">
+                                    <i class="fa-solid fa-wand-magic-sparkles icon-claude"></i>
+                                    <h3>Claude Agentic Recommendations</h3>
+                                </div>
+                                <span class="badge badge-claude">claude-3-5-haiku</span>
+                            </div>
+                            <div class="claude-response-body">
+                                <div id="claude-cache-indicator" class="cache-indicator hide">
+                                    <i class="fa-solid fa-bolt"></i> Cached Response Loaded
+                                </div>
+                                <div class="claude-markdown" id="claude-text-response">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Architecture Section -->
+        <section id="architecture" class="architecture-section">
+            <div class="section-header">
+                <h2>Technical <span class="gradient-text">Architecture</span></h2>
+                <p>An enterprise-grade, privacy-first pipeline blending machine learning classification, structural explainability, and LLM orchestration.</p>
+            </div>
+
+            <!-- Architecture Diagram Panel -->
+            <div class="glass-panel arch-panel">
+                <div class="arch-flow">
+                    <div class="arch-node input-node">
+                        <div class="node-icon"><i class="fa-solid fa-user-clock"></i></div>
+                        <h5>User Input</h5>
+                        <span>Text description, parameters, skin image</span>
+                    </div>
+
+                    <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+                    <div class="arch-node routing-node">
+                        <div class="node-icon"><i class="fa-solid fa-route"></i></div>
+                        <h5>Routing Layer</h5>
+                        <span>Diverges text description and visual lesion image</span>
+                    </div>
+
+                    <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+                    <!-- Split Models Box -->
+                    <div class="arch-cluster">
+                        <div class="arch-node model-node text-model">
+                            <div class="node-icon"><i class="fa-solid fa-font"></i></div>
+                            <h5>DistilBERT / RF</h5>
+                            <span>NLP Classifiers</span>
+                        </div>
+                        <div class="arch-node model-node img-model">
+                            <div class="node-icon"><i class="fa-solid fa-image"></i></div>
+                            <h5>EfficientNetB0</h5>
+                            <span>Skin Lesion Classifier</span>
+                        </div>
+                        <div class="arch-node model-node severity-model">
+                            <div class="node-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                            <h5>XGBoost Scorer</h5>
+                            <span>Risk Score & SHAP</span>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+                    <div class="arch-node gate-node">
+                        <div class="node-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h5>Severity Gate</h5>
+                        <span>If Risk > 75% : Bypass to Emergency | Else: Claude LLM</span>
+                    </div>
+
+                    <div class="flow-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+
+                    <div class="arch-node genai-node">
+                        <div class="node-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                        <h5>Claude Agent</h5>
+                        <span>Haiku 3.5 structured prompting</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="architecture-grid">
+                <div class="glass-panel text-content">
+                    <h4>Multi-Layer Data Routing</h4>
+                    <p>
+                        Our architecture distributes features to custom-trained ML models. For visual indicators (like skin lesions, rashes, or suspicious moles), **EfficientNetB0** performs transfer learning classification across the HAM10000 and general skin disease datasets.
+                    </p>
+                    <p>
+                        Simultaneously, natural language symptom entries are analyzed in parallel: **DistilBERT** classifies unstructured narratives (e.g. *Symptom2Disease*) while a **Random Forest** parses binary symptom flags.
+                    </p>
+                    <p>
+                        Outputs feed into **XGBoost** alongside vital statistics (SpO2, heart rate, temperature) to calculate a clinical severity metric.
+                    </p>
+                </div>
+                
+                <div class="glass-panel text-content">
+                    <h4>Severity Gating & GenAI Safety</h4>
+                    <p>
+                        A strict severity gating rule protects users: if XGBoost grades a patient case with severe features (e.g. high-fever sepsis risk or low SpO2), a high-priority emergency path activates immediately, flagging critical medical emergency warnings to consult immediate professional care.
+                    </p>
+                    <p>
+                        If severity is mild/moderate, **Claude 3.5 Haiku** generates structured suggestions, explaining which clinical paths apply, using prompt engineering to enforce medical boundaries (reaffirming that this tool is decision-support only and not a definitive diagnosis).
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Colab & Deployment Setup Walkthrough Section -->
+        <section id="colab-guides" class="guides-section">
+            <div class="section-header">
+                <h2>Development & <span class="gradient-text">Deployment Guides</span></h2>
+                <p>Detailed step-by-step instructions to train the machine learning layer on Google Colab and host the Gradio endpoint on Hugging Face Spaces.</p>
+            </div>
+
+            <div class="guides-grid">
+                <!-- Guide Navigation -->
+                <div class="guide-nav glass-panel">
+                    <button class="guide-tab-btn active" data-tab="tab-phase1">
+                        <span class="step-num">01</span>
+                        <div class="btn-text-block">
+                            <h5>Phase 1 — Setup & EDA</h5>
+                            <span>Environment, Kaggle API, Preprocessing</span>
+                        </div>
+                    </button>
+                    <button class="guide-tab-btn" data-tab="tab-phase2">
+                        <span class="step-num">02</span>
+                        <div class="btn-text-block">
+                            <h5>Phase 2 — ML Model Training</h5>
+                            <span>EfficientNet, DistilBERT, RF, XGBoost</span>
+                        </div>
+                    </button>
+                    <button class="guide-tab-btn" data-tab="tab-phase3">
+                        <span class="step-num">03</span>
+                        <div class="btn-text-block">
+                            <h5>Phase 3 — Gradio & Space</h5>
+                            <span>Deployment, Claude Integration</span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Guide Content Panel -->
+                <div class="guide-content-panel glass-panel">
+                    <!-- Tab 1 -->
+                    <div id="tab-phase1" class="guide-tab-content active">
+                        <h4>Phase 1: Environment & Kaggle Data Pipeline</h4>
+                        <p>
+                            We initialize our workspace in a Google Colab notebook using the free T4 GPU runtime. This step installs the required PyTorch, Transformers, Scikit-learn, and Anthropic clients, then pulls all three layers of clinical datasets using the Kaggle API.
+                        </p>
+                        
+                        <div class="code-header">
+                            <span>Colab Setup Commands</span>
+                            <button class="copy-code-btn" data-target="code-setup"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <pre class="code-block"><code id="code-setup"># 1. Install required packages
+!pip install -q torch torchvision transformers datasets scikit-learn xgboost shap gradio anthropic joblib
+
+# 2. Configure Kaggle API Credentials (Upload your kaggle.json)
+import os
+os.environ['KAGGLE_CONFIG_DIR'] = '/content'
+
+# 3. Download Kaggle datasets for Image, Text, and Severity layers
+!kaggle datasets download -d kmader/skin-cancer-mnist-ham10000
+!kaggle datasets download -d niyarrbarman/symptom2disease
+!kaggle datasets download -d s3programmer/disease-diagnosis-dataset
+!kaggle datasets download -d kaushil268/disease-prediction-using-machine-learning
+
+# 4. Unzip files
+!unzip -q skin-cancer-mnist-ham10000.zip -d ./ham10000
+!unzip -q symptom2disease.zip -d ./symptom2disease
+!unzip -q disease-diagnosis-dataset.zip -d ./severity_dataset
+!unzip -q disease-prediction-using-machine-learning.zip -d ./symptom_binary</code></pre>
+                        
+                        <div class="alert alert-info">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <strong>Tip:</strong> Create your Kaggle API key token from your Kaggle Account tab ("Create New API Token") and upload the downloaded <code>kaggle.json</code> to your Colab workspace root before running.
+                        </div>
+                    </div>
+
+                    <!-- Tab 2 -->
+                    <div id="tab-phase2" class="guide-tab-content">
+                        <h4>Phase 2: Training the ML Classification Layer</h4>
+                        <p>
+                            Here, we train the models across our three data layers. The image models leverage transfer learning with an EfficientNet-B0 backbone, employing PyTorch with cross-entropy class-weighted loss to address the severe imbalances in HAM10000.
+                        </p>
+
+                        <div class="code-header">
+                            <span>Model Training Snippets</span>
+                            <button class="copy-code-btn" data-target="code-train"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <pre class="code-block"><code id="code-train"># Define EfficientNetB0 Transfer Learning Model for Skin Lesion Classification
+import torch.nn as nn
+from torchvision import models
+
+class LesionClassifier(nn.Module):
+    def __init__(self, num_classes=7):
+        super(LesionClassifier, self).__init__()
+        # Load pre-trained EfficientNetB0
+        self.backbone = models.efficientnet_b0(pretrained=True)
+        # Freeze initial layers to retain low-level image features
+        for param in list(self.backbone.parameters())[:-20]:
+            param.requires_grad = False
+            
+        # Replace classifier head with clinical dropout & linear layer
+        in_features = self.backbone.classifier[1].in_features
+        self.backbone.classifier = nn.Sequential(
+            nn.Dropout(p=0.4, inplace=True),
+            nn.Linear(in_features, num_classes)
+        )
+        
+    def forward(self, x):
+        return self.backbone(x)
+
+# XGBoost Risk & Severity Scoring Pipeline
+from xgboost import XGBClassifier
+from sklearn.model_selection import train_test_split
+
+# Severity Classification: Mild = 0, Moderate = 1, Severe = 2
+xgb = XGBClassifier(
+    n_estimators=150,
+    learning_rate=0.08,
+    max_depth=5,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    scale_pos_weight=1.5 # Adjusted for imbalanced severe classes
+)
+xgb.fit(X_train, y_train)</code></pre>
+                    </div>
+
+                    <!-- Tab 3 -->
+                    <div id="tab-phase3" class="guide-tab-content">
+                        <h4>Phase 3: Deploying the Gradio Server with Claude API</h4>
+                        <p>
+                            We wrap the trained models in a Hugging Face Space using Gradio. The application receives user input, routes features, computes SHAP impact, checks the severity gate, and invokes Claude 3.5 Haiku.
+                        </p>
+
+                        <div class="code-header">
+                            <span>Gradio Deployment Script (`app.py`)</span>
+                            <button class="copy-code-btn" data-target="code-gradio"><i class="fa-regular fa-copy"></i> Copy</button>
+                        </div>
+                        <pre class="code-block"><code id="code-gradio"># Gradio Interface & Triage Controller Setup
+import gradio as gr
+import anthropic
+import joblib
+import torch
+import numpy as np
+
+# Load trained models (loaded once on startup)
+rf_model = joblib.load('models/rf_symptom_model.pkl')
+xgb_severity = joblib.load('models/xgb_severity_model.pkl')
+# Load DistilBERT and PyTorch weights
+# ...
+
+# Initialize Anthropic Client using Hugging Face Space secrets
+client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+
+def triage_pipeline(text_symptoms, image, age, gender, temp, spo2, hr, bp):
+    # 1. Run DistilBERT / RF on text
+    # 2. Run EfficientNetB0 on image (if uploaded)
+    # 3. Run XGBoost on vitals + predictions
+    # 4. Check emergency gating
+    if spo2 < 90 or temp > 39.5:
+        return "CRITICAL EMERGENCY", "Immediate hospital care advised."
+    
+    # 5. Invoke Claude for recommendations
+    # ...
+    return results</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="logo">
+                    <span class="logo-text">MY<span class="logo-accent">DNA</span></span>
+                </div>
+                <p>Clinical-grade medical symptom diagnostic support. Built with Google Colab, Hugging Face, and Claude AI.</p>
+            </div>
+            
+            <div class="footer-links-group">
+                <h5>Navigation</h5>
+                <a href="#hero">Home</a>
+                <a href="#triage-tool">Triage Dashboard</a>
+                <a href="#architecture">Architecture</a>
+                <a href="#colab-guides">Deployment Guides</a>
+            </div>
+
+            <div class="footer-links-group">
+                <h5>Datasets</h5>
+                <a href="https://www.kaggle.com/datasets/kmader/skin-cancer-mnist-ham10000" target="_blank">HAM10000 Skin Lesions</a>
+                <a href="https://www.kaggle.com/datasets/niyarrbarman/symptom2disease" target="_blank">Symptom2Disease NLP</a>
+                <a href="https://www.kaggle.com/datasets/s3programmer/disease-diagnosis-dataset" target="_blank">Disease Severity</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 MYDNA Diagnostics. Designed for clinical decision support. Always seek direct professional medical care for emergencies.</p>
+        </div>
+    </footer>
+
+    <!-- Custom JS -->
+    <script src="app.js"></script>
+</body>
+</html>
