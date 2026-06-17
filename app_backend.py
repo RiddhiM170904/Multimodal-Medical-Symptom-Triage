@@ -18,10 +18,12 @@ import json
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Image Classifier Definition
+# NOTE: Architecture must exactly match the training script in notebooks/2_Model_Training_and_Evaluation.ipynb
 class SkinLesionClassifier(nn.Module):
     def __init__(self, num_classes=7):
         super(SkinLesionClassifier, self).__init__()
-        self.backbone = models.efficientnet_b0(pretrained=False)
+        # weights=None is the modern equivalent of pretrained=False (torchvision >= 0.13)
+        self.backbone = models.efficientnet_b0(weights=None)
         in_features = self.backbone.classifier[1].in_features
         self.backbone.classifier = nn.Sequential(
             nn.Dropout(p=0.4),
@@ -47,7 +49,10 @@ try:
     # Load Image Classifier
     image_model = SkinLesionClassifier(num_classes=7)
     if os.path.exists('best_efficientnet_ham10000.pth'):
-        image_model.load_state_dict(torch.load('best_efficientnet_ham10000.pth', map_location=device))
+        # weights_only=True suppresses FutureWarning on PyTorch >= 2.0
+        image_model.load_state_dict(
+            torch.load('best_efficientnet_ham10000.pth', map_location=device, weights_only=True)
+        )
     image_model.to(device)
     image_model.eval()
 
@@ -76,14 +81,24 @@ image_transforms = transforms.Compose([
 ])
 
 # Clinical labels maps
-ham10000_classes = ['melanoma', 'melanocytic nevus', 'basal cell carcinoma', 'actinic keratosis', 'benign keratosis', 'dermatofibroma', 'vascular lesion']
+# Class order MUST match dx_to_label used during training:
+# dx_to_label = {'mel':0, 'nv':1, 'bcc':2, 'akiec':3, 'bkl':4, 'df':5, 'vasc':6}
+ham10000_classes = [
+    'melanoma',            # 0 — mel
+    'melanocytic nevus',   # 1 — nv
+    'basal cell carcinoma',# 2 — bcc
+    'actinic keratosis',   # 3 — akiec
+    'benign keratosis',    # 4 — bkl
+    'dermatofibroma',      # 5 — df
+    'vascular lesion'      # 6 — vasc
+]
 symptom2disease_classes = ['Fungal infection', 'Allergy', 'GERD', 'Chronic cholestasis', 'Drug Reaction', 'Peptic ulcer disease', 'AIDS', 'Diabetes', 'Gastroenteritis', 'Bronchial Asthma', 'Hypertension', 'Migraine', 'Cervical spondylosis', 'Paralysis (brain hemorrhage)', 'Jaundice', 'Malaria', 'Chicken pox', 'Dengue', 'Typhoid', 'hepatitis A', 'Hepatitis B', 'Hepatitis C', 'Hepatitis D', 'Hepatitis E']
 
 # Cache for Claude API calls (to respect free tier limits)
 response_cache = {}
 
 # ==========================================================================
-// 2. Helper Logic & API Inferences
+#  2. Helper Logic & API Inferences
 # ==========================================================================
 
 def get_cache_key(*args):
