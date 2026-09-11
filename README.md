@@ -1,4 +1,4 @@
-# MY DNA Triage — Multi-Layer AI Clinical Diagnostic System
+# MY DNA Triage — Multi-Layer AI Clinical Diagnostic System Project 
 
 An advanced, multimodal medical decision-support dashboard. The system processes natural language text descriptions, structured vital parameters, and clinical images of skin lesions/wounds simultaneously. It runs a multi-layered classification pipeline **(EfficientNet-B0 + DistilBERT + Random Forest + XGBoost)** and generates agentic triage advice via **Claude 3.5 Haiku**.
 
